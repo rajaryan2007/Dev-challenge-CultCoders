@@ -15,7 +15,7 @@ Anyone can participate — beginners to experienced developers.
 
 # 📅 Challenge Duration
 
-- Start: Tomorrow
+- Start: 18-3-26
 - Total Duration: 8 Days
 - After 8 days, every participant will present their project for **10 minutes**.
 
