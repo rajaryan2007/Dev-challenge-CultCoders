@@ -2,27 +2,37 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLocalHistory();
 });
 
+const baseUrl = 'http://localhost:3000'; // Default to local dev
+
 document.getElementById('analyze-btn').addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    func: () => window.getSelection().toString()
+    func: () => window.getSelection().toString().trim()
   }, async (results) => {
     const selectedText = results[0]?.result;
-    if (!selectedText) {
-      document.getElementById('status').innerText = 'Please select some text first.';
+    
+    if (!selectedText || selectedText.length < 5) {
+      document.getElementById('status').innerText = 'Selection too short. Highlight more text to analyze.';
+      document.getElementById('status').style.color = '#f38ba8';
       return;
     }
 
-    document.getElementById('analyze-btn').disabled = true;
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('status').innerText = 'Analyzing with TruthLens AI...';
-    document.getElementById('result').style.display = 'none';
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const loading = document.getElementById('loading');
+    const status = document.getElementById('status');
+    const resultDiv = document.getElementById('result');
+
+    analyzeBtn.disabled = true;
+    loading.style.display = 'block';
+    status.innerText = 'Triggering TruthLens Neural Core...';
+    status.style.color = '#7f849c';
+    if (resultDiv.style.display === 'block') resultDiv.style.opacity = '0.4';
 
     const startTime = Date.now();
+
     try {
-      const baseUrl = 'http://localhost:3000'; // Default to local dev
       const response = await fetch(`${baseUrl}/api/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,120 +42,143 @@ document.getElementById('analyze-btn').addEventListener('click', async () => {
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Check if you are logged in on TruthLens web.');
+        throw new Error(errData.error || 'Identity verification failed. Please log in to TruthLens.');
       }
 
       let attempts = 0;
-      const normalize = (t) => t.trim().replace(/\s+/g, ' ');
-      const normSelected = normalize(selectedText);
-
       const poll = setInterval(async () => {
+        attempts++;
+        status.innerText = `Extracting truth vectors... [ATTEMPT ${attempts}/30]`;
+
         try {
-          attempts++;
           const historyRes = await fetch(`${baseUrl}/api/history`, {
             credentials: 'include'
           });
-          
+
           if (!historyRes.ok) return;
 
           const historyData = await historyRes.json();
+          
           const latest = historyData.find(item => {
             const itemTime = new Date(item.createdAt).getTime();
-            return itemTime > startTime - 10000 && 
-                   normalize(item.input) === normSelected;
+            const timeDiff = Math.abs(itemTime - startTime);
+            
+            const dbInput = (item.input || "").trim().substring(0, 30);
+            const selInput = selectedText.substring(0, 30);
+            
+            return timeDiff < 120000 && dbInput === selInput;
           });
 
           if (latest) {
             clearInterval(poll);
-            
-            // Save to local storage
-            chrome.storage.local.get({ history: [] }, (result) => {
-              const history = result.history;
-              history.unshift({
-                input: selectedText,
-                result: latest.result,
-                createdAt: latest.createdAt
-              });
-              chrome.storage.local.set({ history: history.slice(0, 20) });
-              loadLocalHistory();
-            });
-
+            saveToLocalHistory(selectedText, latest.result, latest.createdAt);
             showResult(latest);
+            status.innerText = 'Neural extraction complete.';
+            status.style.color = '#a6e3a1';
           }
 
-          if (attempts > 30) {
+          if (attempts >= 30) {
             clearInterval(poll);
-            document.getElementById('status').innerText = 'Analysis timed out. Please check the Dashboard.';
-            document.getElementById('analyze-btn').disabled = false;
-            document.getElementById('loading').style.display = 'none';
+            status.innerText = 'Sync timeout. Please check the Dashboard for your results.';
+            status.style.color = '#fab387';
+            analyzeBtn.disabled = false;
+            loading.style.display = 'none';
           }
-        } catch (pollError) {
-          console.error("Polling error:", pollError);
+        } catch (pollErr) {
+          console.error("Poller error:", pollErr);
         }
       }, 3000);
 
     } catch (error) {
-      document.getElementById('status').innerText = error.message;
-      document.getElementById('analyze-btn').disabled = false;
-      document.getElementById('loading').style.display = 'none';
+      status.innerText = error.message;
+      status.style.color = '#f38ba8';
+      analyzeBtn.disabled = false;
+      loading.style.display = 'none';
     }
   });
 });
 
 function showResult(data) {
   const result = data.result;
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('analyze-btn').style.display = 'none';
-  document.getElementById('status').innerText = 'Analysis Complete';
+  const analysisDiv = document.getElementById('result');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const loading = document.getElementById('loading');
 
-  const scoreBadge = document.getElementById('score-val');
-  scoreBadge.innerText = `MANIPULATION SCORE: ${result.manipulation_score}`;
-  scoreBadge.className = 'score-badge ' + (result.manipulation_score > 70 ? 'high' : result.manipulation_score > 30 ? 'med' : 'low');
+  loading.style.display = 'none';
+  analyzeBtn.style.display = 'none';
+  analysisDiv.style.display = 'block';
+  analysisDiv.style.opacity = '1';
 
-  document.getElementById('bias-val').innerText = `${result.bias.direction.toUpperCase()} BIAS`;
-  document.getElementById('summary-val').innerText = result.bias.explanation;
+  const scoreVal = document.getElementById('score-val');
+  const scoreIndicator = document.getElementById('score-indicator');
+  const score = result.manipulation_score || 0;
+  
+  scoreVal.innerText = `${score}%`;
+  
+  if (score > 70) {
+    scoreVal.style.color = '#f38ba8';
+    scoreIndicator.style.background = '#f38ba8';
+  } else if (score > 30) {
+    scoreVal.style.color = '#fab387';
+    scoreIndicator.style.background = '#fab387';
+  } else {
+    scoreVal.style.color = '#a6e3a1';
+    scoreIndicator.style.background = '#a6e3a1';
+  }
+
+  const biasLabel = document.getElementById('bias-val');
+  const direction = result.bias?.direction?.toUpperCase() || 'NEUTRAL';
+  biasLabel.innerText = `${direction} BIAS DETECTED`;
+  document.getElementById('summary-val').innerText = result.bias?.explanation || "No clear bias vector identified.";
 
   const updateEmo = (id, val) => {
-    const pct = Math.round(val * 100);
-    document.getElementById(`${id}-fill`).style.width = `${pct}%`;
-    document.getElementById(`${id}-pct`).innerText = `${pct}%`;
+    const pct = Math.round((val || 0) * 100);
+    const fill = document.getElementById(`${id}-fill`);
+    const label = document.getElementById(`${id}-pct`);
+    if (fill && label) {
+      fill.style.width = `${pct}%`;
+      label.innerText = `${pct}%`;
+    }
   };
 
-  updateEmo('fear', result.emotions.fear);
-  updateEmo('anger', result.emotions.anger);
-  updateEmo('hope', result.emotions.hope);
-  updateEmo('sadness', result.emotions.sadness);
+  updateEmo('fear', result.emotions?.fear);
+  updateEmo('anger', result.emotions?.anger);
+  updateEmo('hope', result.emotions?.hope);
+  updateEmo('sadness', result.emotions?.sadness);
 
-  const contextList = document.getElementById('context-list');
-  contextList.innerHTML = '';
-  result.missing_context.forEach(text => {
-    const li = document.createElement('li');
-    li.innerText = text;
-    contextList.appendChild(li);
+  document.getElementById('rewrite-val').innerText = result.rewrite || "Failed to reconstruct original context.";
+}
+
+function saveToLocalHistory(input, result, createdAt) {
+  chrome.storage.local.get({ history: [] }, (data) => {
+    const history = data.history;
+    if (history.length > 0 && history[0].input === input) return;
+    
+    history.unshift({ input, result, createdAt });
+    chrome.storage.local.set({ history: history.slice(0, 10) }, () => {
+      loadLocalHistory();
+    });
   });
-
-  document.getElementById('rewrite-val').innerText = result.rewrite;
-  document.getElementById('result').style.display = 'block';
 }
 
 function loadLocalHistory() {
-  chrome.storage.local.get({ history: [] }, (result) => {
-    const history = result.history;
-    const historyContainer = document.getElementById('history-container');
+  chrome.storage.local.get({ history: [] }, (data) => {
+    const history = data.history;
+    const historySection = document.getElementById('history-section');
     const historyList = document.getElementById('history-list');
-    
+
     if (history.length > 0) {
-      historyContainer.style.display = 'block';
+      historySection.style.display = 'block';
       historyList.innerHTML = '';
       history.forEach((item) => {
         const div = document.createElement('div');
-        div.style.cssText = 'background: #181825; padding: 12px; border-radius: 12px; font-size: 11px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; margin-bottom: 8px;';
+        div.className = 'history-item';
         div.innerHTML = `
-          <div style="font-weight: 800; color: #cba6f7; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Score: ${item.result.manipulation_score}</span>
-            <span style="font-size: 8px; opacity: 0.5;">${new Date(item.createdAt).toLocaleDateString()}</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="history-score">${item.result.manipulation_score}% SCORE</span>
+            <span style="font-size: 8px; color: #585b70; font-weight: 800;">${new Date(item.createdAt).toLocaleDateString()}</span>
           </div>
-          <div style="color: #9399b2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic;">"${item.input}"</div>
+          <div class="history-text">"${item.input}"</div>
         `;
         div.onclick = () => showResult(item);
         historyList.appendChild(div);

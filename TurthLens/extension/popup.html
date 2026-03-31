@@ -4,165 +4,335 @@
   <meta charset="UTF-8">
   <title>TruthLens AI</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;900&family=JetBrains+Mono:wght@500&display=swap');
+
     body {
-      width: 340px;
+      width: 360px;
       margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 0;
+      font-family: 'Outfit', -apple-system, system-ui, sans-serif;
       background-color: #1e1e2e;
       color: #cdd6f4;
+      overflow-x: hidden;
     }
-    .container { display: flex; flex-direction: column; gap: 12px; }
-    h1 { font-size: 20px; margin: 0; color: #cba6f7; font-weight: 800; display: flex; align-items: center; gap: 8px; letter-spacing: -0.02em; }
-    .status { font-size: 11px; color: #7f849c; font-weight: 500; }
+
+    .glass-container {
+      padding: 24px;
+      background: radial-gradient(circle at top right, rgba(203, 166, 247, 0.05), transparent 60%);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0 0 4px 0;
+      color: #cba6f7;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.04em;
+    }
+
+    .badge {
+      font-size: 9px;
+      background: rgba(203, 166, 247, 0.1);
+      color: #cba6f7;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .status {
+      font-size: 11px;
+      color: #7f849c;
+      font-weight: 500;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
     .btn {
-      background-color: #cba6f7;
+      width: 100%;
+      background: linear-gradient(135deg, #cba6f7, #b4befe);
       color: #11111b;
       border: none;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: 800;
+      padding: 14px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 14px;
       cursor: pointer;
       text-align: center;
-      transition: all 0.2s;
-      box-shadow: 0 4px 14px 0 rgba(203, 166, 247, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px -6px rgba(203, 166, 247, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .btn:hover { background-color: #b4befe; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-    
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -6px rgba(203, 166, 247, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: #313244;
+      color: #585b70;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
     #result {
-      background: #181825;
-      padding: 16px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.6;
+      margin-top: 24px;
       display: none;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+      animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .section-label {
-      font-size: 9px;
-      font-weight: 800;
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .score-card {
+      background: #181825;
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .score-percentage {
+      font-size: 32px;
+      font-weight: 900;
+      color: #cdd6f4;
+      letter-spacing: -0.05em;
+    }
+
+    .score-label {
+      font-size: 10px;
+      font-weight: 900;
+      color: #585b70;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      color: #585b70;
-      margin-bottom: 8px;
-      margin-top: 20px;
     }
-    .section-label:first-child { margin-top: 0; }
-    
-    .emotion-grid {
+
+    .bias-box {
+      margin: 16px 0;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .bias-title {
+      font-size: 10px;
+      font-weight: 800;
+      color: #cba6f7;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .bias-explanation {
+      font-size: 12px;
+      color: #bac2de;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-    }
-    .emo-label { font-size: 10px; color: #9399b2; font-weight: 600; display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .emo-bar {
-      height: 4px;
-      background: #313244;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .emo-fill { height: 100%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-    
-    .context-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      font-size: 11px;
-      color: #bac2de;
-    }
-    .context-list li {
-      margin-bottom: 6px;
-      padding-left: 14px;
-      position: relative;
-      line-height: 1.4;
-    }
-    .context-list li::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 6px;
-      width: 4px;
-      height: 4px;
-      background: #cba6f7;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #cba6f7;
+      margin-top: 16px;
     }
 
-    .rewrite-box {
-      background: rgba(203, 166, 247, 0.05);
-      border: 1px solid rgba(203, 166, 247, 0.1);
-      padding: 12px;
+    .emo-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 10px;
       border-radius: 12px;
-      font-style: italic;
-      color: #cdd6f4;
-      font-size: 12px;
-      line-height: 1.5;
     }
-    .score-badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 900;
+
+    .emo-info {
+      display: flex;
+      justify-content: space-between;
       font-size: 10px;
-      display: inline-block;
-      margin-bottom: 8px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #9399b2;
     }
-    .high { background: rgba(243, 139, 168, 0.2); color: #f38ba8; }
-    .med { background: rgba(250, 179, 135, 0.2); color: #fab387; }
-    .low { background: rgba(166, 227, 161, 0.2); color: #a6e3a1; }
+
+    .progress-bg {
+      height: 4px;
+      background: #313244;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .rewrite-section {
+      margin-top: 20px;
+      background: #11111b;
+      padding: 16px;
+      border-radius: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #a6e3a1;
+      line-height: 1.6;
+      border: 1px solid rgba(166, 227, 161, 0.1);
+    }
+
+    .history-section {
+      margin-top: 32px;
+      border-top: 1px solid #313244;
+      padding-top: 20px;
+      display: none;
+    }
+
+    .history-item {
+      background: #181825;
+      padding: 12px;
+      border-radius: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .history-item:hover {
+      border-color: #cba6f7;
+      background: #1e1e2e;
+    }
+
+    .history-score {
+      font-weight: 900;
+      color: #cba6f7;
+      font-size: 12px;
+    }
+
+    .history-text {
+      font-size: 10px;
+      color: #6c7086;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 4px;
+    }
+
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(203, 166, 247, 0.3);
+      border-radius: 50%;
+      border-top-color: #cba6f7;
+      animation: spin 0.8s linear infinite;
+      display: none;
+      margin: 0 auto 10px auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .score-badge-high { color: #f38ba8; }
+    .score-badge-med { color: #fab387; }
+    .score-badge-low { color: #a6e3a1; }
+
+    .dashboard-lnk {
+      display: block;
+      margin-top: 24px;
+      color: #cba6f7;
+      font-size: 10px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .dashboard-lnk:hover {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>TruthLens AI</h1>
-    <div class="status" id="status">Select text on page and click analyze.</div>
-    <div id="loading" class="loader"></div>
-    <button id="analyze-btn" class="btn">Analyze Selection</button>
-    
-    <div id="history-container" style="display: none; margin-top: 16px; border-top: 1px solid #313244; padding-top: 12px;">
-      <div class="section-label">Recent Analyses (Local)</div>
-      <div id="history-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+  <div class="glass-container">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+      <h1>TruthLens <span class="badge">AI</span></h1>
+      <span style="font-size: 8px; color: #585b70; font-weight: 900;">v2.4.1</span>
     </div>
+    
+    <div class="status" id="status">Select any text on the webpage, then trigger analysis to expose manipulation vectors.</div>
+    
+    <div id="loading" class="loader"></div>
+    
+    <button id="analyze-btn" class="btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m19 11-4-7"/><path d="m10 7-3.22 9.66"/><path d="m14 7 3.22 9.66"/><path d="m2 20 2-5"/><path d="m22 20-2-5"/><path d="M5 20h14"/></svg>
+      ACTIVATE ANALYZER
+    </button>
 
     <div id="result">
+      <div class="score-card">
+        <div class="score-header">
+          <div>
+            <div class="score-label">Manipulation Index</div>
+            <div id="score-val" class="score-percentage">0%</div>
+          </div>
+          <div id="score-indicator" style="width: 12px; height: 12px; border-radius: 50%;"></div>
+        </div>
 
-      <div id="score-val" class="score-badge"></div>
-      
-      <div class="section-label">Bias Vector</div>
-      <div id="bias-val" style="font-weight: 800; color: #cdd6f4;"></div>
-      <div id="summary-val" style="font-size: 11px; color: #9399b2; margin-top: 4px; font-style: italic;"></div>
+        <div class="bias-box">
+          <div class="bias-title" id="bias-val">NEUTRAL BIAS</div>
+          <div class="bias-explanation" id="summary-val">Calculating narrative vectors...</div>
+        </div>
 
-      <div class="section-label">Sentiment Resonance</div>
-      <div class="emotion-grid">
-        <div>
-          <div class="emo-label">Fear <span id="fear-pct">0%</span></div>
-          <div class="emo-bar"><div id="fear-fill" class="emo-fill" style="background: #cba6f7;"></div></div>
+        <div class="grid">
+          <div class="emo-stat">
+            <div class="emo-info">Fear <span id="fear-pct">0%</span></div>
+            <div class="progress-bg"><div id="fear-fill" class="progress-fill" style="background: #cba6f7;"></div></div>
+          </div>
+          <div class="emo-stat">
+            <div class="emo-info">Anger <span id="anger-pct">0%</span></div>
+            <div class="progress-bg"><div id="anger-fill" class="progress-fill" style="background: #f38ba8;"></div></div>
+          </div>
+          <div class="emo-stat">
+            <div class="emo-info">Hope <span id="hope-pct">0%</span></div>
+            <div class="progress-bg"><div id="hope-fill" class="progress-fill" style="background: #a6e3a1;"></div></div>
+          </div>
+          <div class="emo-stat">
+            <div class="emo-info">Sadness <span id="sadness-pct">0%</span></div>
+            <div class="progress-bg"><div id="sadness-fill" class="progress-fill" style="background: #89b4fa;"></div></div>
+          </div>
         </div>
-        <div>
-          <div class="emo-label">Anger <span id="anger-pct">0%</span></div>
-          <div class="emo-bar"><div id="anger-fill" class="emo-fill" style="background: #f38ba8;"></div></div>
-        </div>
-        <div>
-          <div class="emo-label">Hope <span id="hope-pct">0%</span></div>
-          <div class="emo-bar"><div id="hope-fill" class="emo-fill" style="background: #a6e3a1;"></div></div>
-        </div>
-        <div>
-          <div class="emo-label">Sadness <span id="sadness-pct">0%</span></div>
-          <div class="emo-bar"><div id="sadness-fill" class="emo-fill" style="background: #89b4fa;"></div></div>
-        </div>
+
+        <div class="section-label" style="margin-top: 24px;">RECONSTRUCTED OBJECTIVE</div>
+        <div id="rewrite-val" class="rewrite-section">...</div>
       </div>
+      
+      <a href="http://localhost:3000" target="_blank" class="dashboard-lnk">OPEN FULL DASHBOARD →</a>
+    </div>
 
-      <div class="section-label">Missing Perspectives</div>
-      <ul id="context-list" class="context-list"></ul>
-
-      <div class="section-label">Objective Reconstruction</div>
-      <div id="rewrite-val" class="rewrite-box"></div>
-
-      <a href="http://localhost:3000" target="_blank" id="dashboard-link" style="display: block; margin-top: 20px; color: #cba6f7; font-size: 10px; text-decoration: none; text-align: center; font-weight: 900; opacity: 0.8; letter-spacing: 0.2em;">TRUTHLENS OS // DASHBOARD →</a>
+    <div id="history-section" class="history-section">
+      <div class="score-label" style="margin-bottom: 12px;">Recent Intel</div>
+      <div id="history-list"></div>
     </div>
   </div>
+
   <script src="popup.js"></script>
 </body>
 </html>
