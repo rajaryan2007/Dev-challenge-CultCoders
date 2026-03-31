@@ -6,7 +6,7 @@
   "permissions": ["activeTab", "scripting", "contextMenus", "storage"],
   "host_permissions": [
     "http://localhost:3000/*",
-    "https://truthlens.vercel.app/*"
+    "https://dev-challenge-cult-coders.vercel.app/*"
   ],
   "background": {
     "service_worker": "background.js"

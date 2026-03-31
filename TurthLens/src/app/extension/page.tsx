@@ -71,14 +71,14 @@ export default function ExtensionPage() {
 
                     <div className="pt-8 flex flex-col items-center gap-8 border-t border-white/5">
                         <a
-                            href="https://github.com/rajaryan2007/truthlens/releases/tag/truthlens"
+                            href="https://github.com/rajaryan2007/Dev-challenge-CultCoders/releases/tag/v1"
                             className="bg-[#cba6f7] text-[#1e1e2e] hover:bg-[#b4befe] rounded-[2rem] px-16 py-6 text-xl font-black transition-all hover:scale-[1.05] active:scale-[0.95] shadow-[0_0_40px_rgba(203,166,247,0.3)] flex items-center gap-4 group"
                         >
                             <Download size={24} className="group-hover:translate-y-1 transition-transform" />
                             ACTIVATE PROTOCOL
                         </a>
                         <p className="text-[10px] text-[#585b70] uppercase tracking-[0.6em] font-black opacity-60">
-                            TruthLens Engine v2.4.0 // Secured Connection
+                            TruthLens Engine v1.0 // Secured Connection
                         </p>
                     </div>
                 </div>

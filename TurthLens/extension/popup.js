@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLocalHistory();
 });
 
-const baseUrl = 'http://localhost:3000'; // Default to local dev
+const baseUrl = 'https://dev-challenge-cult-coders.vercel.app'; // Production endpoint
 
 document.getElementById('analyze-btn').addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
