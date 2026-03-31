@@ -1,0 +1,135 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-heading);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --mocha-rosewater: #f5e0dc;
+  --mocha-flamingo: #f2cdcd;
+  --mocha-pink: #f5c2e7;
+  --mocha-mauve: #cba6f7;
+  --mocha-red: #f38ba8;
+  --mocha-maroon: #eba0ac;
+  --mocha-peach: #fab387;
+  --mocha-yellow: #f9e2af;
+  --mocha-green: #a6e3a1;
+  --mocha-teal: #94e2d5;
+  --mocha-sky: #89dceb;
+  --mocha-sapphire: #74c7ec;
+  --mocha-blue: #89b4fa;
+  --mocha-lavender: #b4befe;
+  --mocha-text: #cdd6f4;
+  --mocha-subtext1: #bac2de;
+  --mocha-subtext0: #a6adc8;
+  --mocha-overlay2: #9399b2;
+  --mocha-overlay1: #7f849c;
+  --mocha-overlay0: #6c7086;
+  --mocha-surface2: #585b70;
+  --mocha-surface1: #45475a;
+  --mocha-surface0: #313244;
+  --mocha-base: #1e1e2e;
+  --mocha-mantle: #181825;
+  --mocha-crust: #11111b;
+
+  --background: var(--mocha-base);
+  --foreground: var(--mocha-text);
+  --card: var(--mocha-surface0);
+  --card-foreground: var(--mocha-text);
+  --popover: var(--mocha-mantle);
+  --popover-foreground: var(--mocha-text);
+  --primary: var(--mocha-mauve);
+  --primary-foreground: var(--mocha-crust);
+  --secondary: var(--mocha-surface1);
+  --secondary-foreground: var(--mocha-text);
+  --muted: var(--mocha-surface0);
+  --muted-foreground: var(--mocha-overlay1);
+  --accent: var(--mocha-surface1);
+  --accent-foreground: var(--mocha-text);
+  --destructive: var(--mocha-red);
+  --border: var(--mocha-surface1);
+  --input: var(--mocha-surface0);
+  --ring: var(--mocha-mauve);
+  --radius: 1rem;
+}
+
+.dark {
+  --background: var(--mocha-base);
+  --foreground: var(--mocha-text);
+  --card: var(--mocha-surface0);
+  --card-foreground: var(--mocha-text);
+  --popover: var(--mocha-mantle);
+  --popover-foreground: var(--mocha-text);
+  --primary: var(--mocha-mauve);
+  --primary-foreground: var(--mocha-crust);
+  --secondary: var(--mocha-surface1);
+  --secondary-foreground: var(--mocha-text);
+  --muted: var(--mocha-surface0);
+  --muted-foreground: var(--mocha-overlay1);
+  --accent: var(--mocha-surface1);
+  --accent-foreground: var(--mocha-text);
+  --destructive: var(--mocha-red);
+  --border: var(--mocha-surface1);
+  --input: var(--mocha-surface0);
+  --ring: var(--mocha-mauve);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.animate-in, .animate-out {
+  animation-fill-mode: both !important;
+}
